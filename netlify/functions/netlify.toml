@@ -1,0 +1,6 @@
+vera-app/
+├── index.html        ✓ already done
+├── netlify.toml      
+└── netlify/
+    └── functions/
+        └── claude.js
