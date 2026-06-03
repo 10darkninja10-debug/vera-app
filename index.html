@@ -1,0 +1,2434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Vera — Personal OS</title>
+
+<!-- iPhone / iPad home screen PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Vera">
+<meta name="theme-color" content="#F4F5F2">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Vera">
+<meta name="description" content="Your personal productivity OS — money, workouts, goals, and AI coaching.">
+
+<!-- App icon shown on iPhone home screen -->
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjNUE2QTYzIi8+PHRleHQgeD0iOTAiIHk9IjEyNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ii1hcHBsZS1zeXN0ZW0sQmxpbmtNYWNTeXN0ZW1Gb250LHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iOTYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNGNEY1RjIiPlY8L3RleHQ+PC9zdmc+">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjNUE2QTYzIi8+PHRleHQgeD0iOTAiIHk9IjEyNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ii1hcHBsZS1zeXN0ZW0sQmxpbmtNYWNTeXN0ZW1Gb250LHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iOTYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNGNEY1RjIiPlY8L3RleHQ+PC9zdmc+">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:      #F4F5F2;
+  --surface: #D6DCD5;
+  --surface2: #C8CEC7;
+  --surface3: #E2E6E1;
+  --text:    #1E2422;
+  --accent:  #5A6A63;
+  --muted:   #525C58;
+  --border:  rgba(42,47,45,0.15);
+  --border2: rgba(42,47,45,0.26);
+  --danger:  #8B3E3E;
+  --positive:#2E6B56;
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+  --radius:    12px;
+  --radius-sm: 7px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+.app-shell { display:flex; min-height:100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 210px;
+  background: var(--surface);
+  border-right: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top:0; left:0; bottom:0;
+  z-index: 100;
+}
+
+.logo {
+  padding: 30px 24px 22px;
+  border-bottom: 1px solid var(--border2);
+}
+.logo-name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: var(--text);
+}
+.logo-sub {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  margin-top: 3px;
+}
+
+.nav { padding: 14px 12px; flex:1; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  user-select: none;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+  background: var(--bg);
+  color: var(--accent);
+  border-color: var(--border2);
+}
+
+.nav-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--border2);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.nav-item.active .nav-dot { background: var(--accent); }
+
+.sidebar-footer {
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--border2);
+}
+.api-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  display: block;
+  margin-bottom: 6px;
+}
+.api-key-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.api-key-input:focus { border-color: var(--accent); }
+.api-key-input::placeholder { color: var(--muted); }
+
+/* ── MAIN ── */
+.main { margin-left: 210px; flex:1; padding: 38px 44px; max-width:100%; }
+
+/* ── TABS ── */
+.tab-content { display:none; animation: fadeUp 0.25s ease; }
+.tab-content.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 30px; }
+.page-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.page-sub { color: var(--muted); font-size: 14px; font-weight: 500; }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+.card + .card { margin-top: 14px; }
+
+.card-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+/* ── GRID ── */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.grid-auto { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; }
+
+/* ── FORM ── */
+.form-row { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+.form-group { display:flex; flex-direction:column; gap:5px; flex:1; min-width:110px; }
+.form-group label {
+  font-size: 12px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.18s;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+select option { background: var(--surface); }
+textarea { resize:vertical; min-height:72px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #F4F5F2;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: #4a5a53; border-color: #4a5a53; }
+
+.btn-surface {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border2);
+}
+.btn-surface:hover { background: var(--surface); }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-danger {
+  background: transparent;
+  border: 1px solid rgba(154,90,90,0.25);
+  color: var(--danger);
+}
+.btn-danger:hover { background: rgba(154,90,90,0.07); }
+
+/* ── STAT CARDS ── */
+.stat {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.stat-label { font-size: 11px; color: var(--accent); font-family: var(--font-mono); text-transform:uppercase; letter-spacing:0.10em; margin-bottom:8px; font-weight:500; }
+.stat-value { font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+.stat-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+/* ── BALANCE BAR ── */
+.balance-bar-wrap { margin: 14px 0; }
+.balance-bar-track {
+  height: 6px;
+  background: var(--bg);
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.balance-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--accent);
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── TRANSACTION LIST ── */
+.tx-list { display:flex; flex-direction:column; gap:6px; }
+.tx-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: border-color 0.15s;
+}
+.tx-item:hover { border-color: var(--border2); }
+.tx-left { display:flex; align-items:center; gap:12px; }
+.tx-type-pill {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.tx-type-pill.income { background: rgba(74,122,106,0.12); color: var(--positive); }
+.tx-type-pill.expense { background: rgba(154,90,90,0.10); color: var(--danger); }
+.tx-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.tx-date { font-size: 12px; color: var(--muted); font-family: var(--font-mono); font-weight: 500; }
+.tx-amount { font-family: var(--font-mono); font-size: 13px; font-weight: 500; }
+.tx-amount.income { color: var(--positive); }
+.tx-amount.expense { color: var(--danger); }
+
+/* ── SIM BANNER ── */
+.sim-banner {
+  background: rgba(90,106,99,0.07);
+  border: 1px solid rgba(90,106,99,0.20);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+}
+
+/* ── EXERCISE ── */
+.exercise-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.exercise-check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.18s;
+  font-size: 10px;
+  color: transparent;
+}
+.exercise-check.done { background: var(--accent); border-color: var(--accent); color: #F4F5F2; }
+.exercise-name { flex:1; font-size: 14px; color: var(--text); font-weight: 500; }
+.exercise-reps { font-family: var(--font-mono); font-size: 13px; color: var(--accent); font-weight: 500; }
+.exercise-delete { cursor:pointer; color: var(--muted); font-size: 14px; opacity:0.5; transition:opacity 0.15s; line-height:1; }
+.exercise-delete:hover { opacity:1; color: var(--danger); }
+
+/* ── AI CHAT ── */
+.chat-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 480px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.chat-messages {
+  flex:1;
+  overflow-y:auto;
+  padding: 20px;
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.msg { display:flex; gap:10px; max-width:86%; }
+.msg.user { margin-left:auto; flex-direction:row-reverse; }
+.msg-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+.msg.ai .msg-avatar { background: var(--surface2); color: var(--accent); border: 1px solid var(--border2); }
+.msg.user .msg-avatar { background: var(--accent); color: var(--bg); }
+.msg-bubble {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.msg.ai .msg-bubble {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 3px 10px 10px 10px;
+  color: var(--text);
+}
+.msg.user .msg-bubble {
+  background: var(--accent);
+  color: #F4F5F2;
+  border-radius: 10px 3px 10px 10px;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border2);
+  background: var(--surface2);
+}
+.chat-input {
+  flex:1;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 9px 13px;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.chat-input:focus { border-color: var(--accent); }
+.chat-input::placeholder { color: var(--muted); }
+
+.typing-indicator span {
+  display:inline-block;
+  width:5px; height:5px;
+  border-radius:50%;
+  background: var(--muted);
+  margin: 0 2px;
+  animation: bounce 1.2s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay:0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay:0.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+/* ── PRODUCTIVITY SCORE ── */
+.score-ring { position:relative; width:110px; height:110px; margin: 0 auto 16px; }
+.score-ring svg { transform:rotate(-90deg); }
+.score-ring-num {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+}
+.score-big { font-family:var(--font-display); font-size:30px; font-weight:800; color:var(--accent); }
+.score-label { font-size:10px; color:var(--muted); font-family:var(--font-mono); letter-spacing:0.06em; }
+
+/* ── TASK LIST ── */
+.task-item {
+  display:flex; align-items:center; gap:10px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 6px;
+  transition: all 0.15s;
+}
+.task-check {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--border2);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex; align-items:center; justify-content:center;
+  flex-shrink: 0;
+  transition: all 0.18s;
+  font-size: 10px;
+  color: transparent;
+}
+.task-check.done { background: var(--accent); border-color: var(--accent); color: #F4F5F2; }
+.task-text { flex:1; font-size:14px; color:var(--text); font-weight:500; }
+.task-item.done-item .task-text { text-decoration:line-through; color:var(--muted); }
+.task-del { cursor:pointer; color:var(--muted); opacity:0.5; transition:opacity 0.15s; font-size:14px; line-height:1; }
+.task-del:hover { opacity:1; color:var(--danger); }
+
+/* ── GOALS ── */
+.goal-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.goal-card:hover { border-color: var(--accent); }
+.goal-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+.goal-title { font-family:var(--font-display); font-size:16px; font-weight:700; color:var(--text); }
+.goal-progress-bar { height:5px; background:var(--surface2); border-radius:99px; margin-bottom:7px; }
+.goal-progress-fill { height:100%; border-radius:99px; background:var(--accent); transition:width 0.5s ease; }
+.goal-pct { font-family:var(--font-mono); font-size:12px; color:var(--accent); font-weight:500; }
+.goal-streak {
+  display:inline-flex; align-items:center; gap:4px;
+  background: rgba(90,106,99,0.08);
+  border: 1px solid rgba(90,106,99,0.18);
+  color: var(--accent);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+/* ── BADGE ── */
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:10px; padding:3px 9px; border-radius:99px;
+  font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.06em;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  background: var(--bg);
+}
+.badge-ai {
+  background: rgba(90,106,99,0.10);
+  border-color: rgba(90,106,99,0.28);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── SECTION GAP ── */
+.section-gap { margin-top:20px; }
+
+/* ── THINKING ── */
+.ai-thinking {
+  display:flex; align-items:center; gap:8px;
+  padding: 10px 14px;
+  background: rgba(90,106,99,0.06);
+  border: 1px solid rgba(90,106,99,0.15);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+  margin: 8px 0;
+}
+.ai-dot {
+  width:7px; height:7px;
+  border-radius:50%;
+  background:var(--accent);
+  animation: pulse 1.5s infinite;
+  flex-shrink:0;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.65)} }
+
+/* ── EMPTY STATE ── */
+.empty { text-align:center; padding:36px 20px; color:var(--muted); }
+.empty-line { width:32px; height:2px; background:var(--surface2); margin:0 auto 12px; border-radius:1px; }
+.empty-text { font-size:13px; font-family:var(--font-mono); letter-spacing:0.04em; color:var(--muted); font-weight:500; }
+
+/* ── ALERT ── */
+.alert {
+  padding: 11px 15px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+}
+.alert-warn { background:rgba(154,90,90,0.07); border:1px solid rgba(154,90,90,0.18); color:var(--danger); }
+.alert-info { background:rgba(90,106,99,0.07); border:1px solid rgba(90,106,99,0.18); color:var(--accent); }
+.alert-success { background:rgba(74,122,106,0.07); border:1px solid rgba(74,122,106,0.18); color:var(--positive); }
+
+/* ── DIVIDER ── */
+.divider { height:1px; background:var(--border2); margin:18px 0; }
+
+/* ── TX DELETE BUTTON ── */
+.tx-delete-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 3px 7px;
+  transition: all 0.15s;
+  opacity: 0;
+  font-family: var(--font-body);
+}
+.tx-item:hover .tx-delete-btn {
+  opacity: 1;
+  border-color: var(--border2);
+  color: var(--danger);
+}
+.tx-delete-btn:hover {
+  background: rgba(154,90,90,0.08) !important;
+}
+
+/* ── TX LIST SCROLL ── */
+.tx-list {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--surface2); border-radius:3px; }
+
+/* ── BOTTOM NAV (mobile) ── */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border2);
+  padding: 8px 4px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  z-index: 200;
+  justify-content: space-around;
+  align-items: center;
+}
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 56px;
+  border: 1px solid transparent;
+}
+.bottom-nav-item.active {
+  background: var(--bg);
+  border-color: var(--border2);
+}
+.bottom-nav-icon {
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+}
+.bottom-nav-icon svg { width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
+.bottom-nav-item.active .bottom-nav-icon svg { stroke: var(--accent); }
+.bottom-nav-label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  transition: color 0.15s;
+  font-weight: 500;
+}
+.bottom-nav-item.active .bottom-nav-label { color: var(--accent); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .bottom-nav { display: flex; }
+
+  .main {
+    margin-left: 0;
+    padding: 20px 16px;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    padding-top: calc(16px + env(safe-area-inset-top));
+  }
+
+  .page-title { font-size: 22px; }
+  .page-header { margin-bottom: 18px; }
+
+  /* Grids stack on mobile */
+  .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 10px; }
+  .grid-auto { grid-template-columns: 1fr 1fr; }
+
+  /* Prevent iOS font zoom on inputs */
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea,
+  .chat-input,
+  .api-key-input { font-size: 16px !important; }
+
+  .stat-value { font-size: 20px; }
+  .card { padding: 14px; }
+
+  /* Form rows: keep inline fields side by side, only stack on very narrow */
+  .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  /* Full-width fields in form rows */
+  .form-row .form-group.full { flex: 1 1 100%; }
+  /* The Add/Log button in a form row goes full width */
+  .form-row > .btn { flex: 1 1 100%; justify-content: center; margin-top: 4px !important; }
+
+  /* Workout: Exercise full width, Sets + Reps side by side */
+  #tab-workout .form-row .form-group:first-child { flex: 1 1 100%; }
+  #tab-workout .form-row .form-group:not(:first-child):not(:last-child) { flex: 1; min-width: 80px; }
+
+  /* Money: description full width, amount + type side by side */
+  #tab-money .form-row { flex-wrap: wrap; }
+  #tab-money .form-row .form-group:first-child { flex: 1 1 100%; }
+
+  /* Run: distance full, time + date side by side */
+  #tab-workout .card:nth-child(2) .form-row .form-group { flex: 1; min-width: 100px; }
+
+  /* Productivity form row stays side by side */
+  #tab-productivity .form-row { flex-wrap: nowrap; }
+  #tab-productivity .form-row .form-group { flex: 1; }
+  #tab-productivity .form-row .btn { flex: 0 0 auto; width: auto !important; }
+
+  /* Goals form row */
+  #tab-goals .form-row .form-group { flex: 1; min-width: 110px; }
+  #tab-goals .form-row .btn { flex: 1 1 100%; justify-content: center; }
+
+  .chat-wrap { height: 58vh; }
+  .tx-delete-btn { opacity: 1 !important; }
+  .btn { padding: 11px 16px; }
+  .score-ring { width: 100px; height: 100px; }
+}
+
+/* ── DAY CHIPS (recurring task modal) ── */
+.day-chip { cursor:pointer; user-select:none; }
+.day-chip input[type="checkbox"] { display:none; }
+.day-chip span {
+  display: inline-block;
+  padding: 6px 11px;
+  border-radius: 99px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.day-chip input:checked + span { background: var(--accent); border-color: var(--accent); color: #F4F5F2; }
+
+/* ── RECURRING TASK ITEM ── */
+.recur-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+}
+.recur-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.recur-days { font-size: 10px; font-family: var(--font-mono); color: var(--accent); margin-top: 2px; letter-spacing: 0.03em; }
+.recur-del { cursor:pointer; color:var(--muted); opacity:0.6; font-size:14px; transition:opacity 0.15s; padding:4px; }
+.recur-del:hover { opacity:1; color:var(--danger); }
+
+/* ── TASK RECUR BADGE ── */
+.task-recur-badge {
+  font-size: 9px; font-family: var(--font-mono);
+  background: rgba(90,106,99,0.10); color: var(--accent);
+  border: 1px solid rgba(90,106,99,0.20); border-radius: 4px;
+  padding: 2px 6px; margin-left: 6px; white-space: nowrap; letter-spacing: 0.04em;
+}
+
+/* ── MOBILE API KEY MODAL ── */
+.api-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(42,47,45,0.5);
+  z-index: 500;
+  align-items: flex-end;
+  justify-content: center;
+}
+.api-modal-overlay.open { display: flex; }
+.api-modal {
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  padding: 28px 24px;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 520px;
+  border-top: 1px solid var(--border2);
+}
+.api-modal-handle {
+  width: 36px; height: 4px;
+  background: var(--surface2);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+.api-modal h3 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.api-modal p {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.api-modal-status {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-top: 10px;
+  display: none;
+}
+.api-modal-status.ok { background: rgba(74,122,106,0.1); color: var(--positive); display: block; }
+.api-modal-status.empty { background: rgba(154,90,90,0.08); color: var(--danger); display: block; }
+
+/* Key icon in bottom nav area */
+.bottom-nav-key {
+  position: fixed;
+  bottom: calc(74px + env(safe-area-inset-bottom));
+  right: 16px;
+  width: 38px; height: 38px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 150;
+  box-shadow: 0 2px 8px rgba(42,47,45,0.12);
+}
+@media (max-width: 768px) {
+  .bottom-nav-key { display: flex; }
+}
+.bottom-nav-key svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* ── SPEEDOMETER GAUGE ── */
+.gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0 0;
+}
+.gauge-svg {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  overflow: visible;
+}
+.gauge-legend {
+  display: flex;
+  gap: 18px;
+  margin-top: 6px;
+  justify-content: center;
+}
+.gauge-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.gauge-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-name">Vera</div>
+    <div class="logo-sub">Personal OS</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" data-tab="money" onclick="switchTab('money',this,false)">
+      <div class="nav-dot"></div>
+      <span>Money</span>
+    </div>
+    <div class="nav-item" data-tab="workout" onclick="switchTab('workout',this,false)">
+      <div class="nav-dot"></div>
+      <span>Workouts</span>
+    </div>
+    <div class="nav-item" data-tab="productivity" onclick="switchTab('productivity',this,false)">
+      <div class="nav-dot"></div>
+      <span>Productivity</span>
+    </div>
+    <div class="nav-item" data-tab="goals" onclick="switchTab('goals',this,false)">
+      <div class="nav-dot"></div>
+      <span>Goals</span>
+    </div>
+    <div class="nav-item" data-tab="ai" onclick="switchTab('ai',this,false)">
+      <div class="nav-dot"></div>
+      <span>AI Assistant</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <label class="api-label">Gemini API Key</label>
+    <input class="api-key-input" type="password" id="apiKey" placeholder="AIza..." oninput="saveApiKey(this.value)">
+    <label class="api-label" style="margin-top:10px">Proxy URL (leave blank)</label>
+    <input class="api-key-input" type="text" id="proxyUrl" placeholder="https://vera.you.workers.dev" oninput="saveProxyUrl(this.value)">
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- MONEY -->
+<div class="tab-content active" id="tab-money">
+  <div class="page-header">
+    <div class="page-title">Money</div>
+    <div class="page-sub">Track income, expenses, and simulate purchases before committing</div>
+  </div>
+
+  <div id="sim-banner" class="sim-banner" style="display:none">
+    Simulation active — this balance is hypothetical
+    <button class="btn btn-ghost" style="padding:4px 12px;font-size:11px;margin-left:auto" onclick="exitSim()">Exit</button>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:14px">
+    <div class="stat">
+      <div class="stat-label">Balance</div>
+      <div class="stat-value" id="balanceVal">$0.00</div>
+      <div class="stat-sub">Current funds</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total Income</div>
+      <div class="stat-value" id="incomeTotal">$0.00</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total Expenses</div>
+      <div class="stat-value" id="expenseTotal">$0.00</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Balance Meter</div>
+    <div class="gauge-wrap">
+      <svg class="gauge-svg" viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background arc (full 180°) -->
+        <path d="M 20 145 A 110 110 0 0 1 240 145" fill="none" stroke="#C8CEC7" stroke-width="20" stroke-linecap="butt"/>
+
+        <!-- Expense arc (red) -->
+        <path id="gaugeExpense" d="M 20 145 A 110 110 0 0 1 240 145" fill="none" stroke="#C0392B" stroke-width="20" stroke-linecap="butt"
+          stroke-dasharray="345" stroke-dashoffset="345" style="transition: stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1)"/>
+
+        <!-- Balance arc (green, on top) -->
+        <path id="gaugeBalance" d="M 20 145 A 110 110 0 0 1 240 145" fill="none" stroke="#27AE60" stroke-width="20" stroke-linecap="butt"
+          stroke-dasharray="345" stroke-dashoffset="345" style="transition: stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1)"/>
+
+        <!-- Simulation arc (blue) -->
+        <path id="gaugeSim" d="M 20 145 A 110 110 0 0 1 240 145" fill="none" stroke="#2471A3" stroke-width="20" stroke-linecap="butt"
+          stroke-dasharray="345" stroke-dashoffset="345" opacity="0" style="transition: all 0.9s cubic-bezier(0.4,0,0.2,1)"/>
+
+        <!-- Tick marks (drawn over arcs) -->
+        <g id="gaugeTicks" stroke="#F4F5F2" stroke-linecap="round">
+          <!-- 11 ticks at 0°,18°,...,180° mapped onto the semicircle -->
+          <line x1="130" y1="28" x2="130" y2="38" transform="rotate(-90 130 145)" stroke-width="2"/>
+          <line x1="130" y1="28" x2="130" y2="34" transform="rotate(-72 130 145)" stroke-width="1.5"/>
+          <line x1="130" y1="28" x2="130" y2="34" transform="rotate(-54 130 145)" stroke-width="1.5"/>
+          <line x1="130" y1="28" x2="130" y2="34" transform="rotate(-36 130 145)" stroke-width="1.5"/>
+          <line x1="130" y1="28" x2="130" y2="34" transform="rotate(-18 130 145)" stroke-width="1.5"/>
+          <line x1="130" y1="28" x2="130" y2="38" transform="rotate(0 130 145)" stroke-width="2"/>
+          <line x1="130" y1="28" x2="130" y2="34" transform="rotate(18 130 145)" stroke-width="1.5"/>
+          <line x1="130" y1="28" x2="130" y2="34" transform="rotate(36 130 145)" stroke-width="1.5"/>
+          <line x1="130" y1="28" x2="130" y2="34" transform="rotate(54 130 145)" stroke-width="1.5"/>
+          <line x1="130" y1="28" x2="130" y2="34" transform="rotate(72 130 145)" stroke-width="1.5"/>
+          <line x1="130" y1="28" x2="130" y2="38" transform="rotate(90 130 145)" stroke-width="2"/>
+        </g>
+
+        <!-- Needle -->
+        <g id="gaugeNeedle" style="transform-origin:130px 145px; transform:rotate(-90deg); transition: transform 0.9s cubic-bezier(0.4,0,0.2,1)">
+          <line x1="130" y1="145" x2="130" y2="58" stroke="#1E2422" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="130" cy="145" r="8" fill="#1E2422"/>
+          <circle cx="130" cy="145" r="4" fill="#F4F5F2"/>
+        </g>
+
+        <!-- Center value text -->
+        <text id="gaugeMainLabel" x="130" y="122" text-anchor="middle" font-family="Syne,sans-serif" font-size="21" font-weight="700" fill="#1E2422">$0</text>
+        <text id="gaugeSubLabel" x="130" y="137" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#525C58" letter-spacing="0.10em">BALANCE</text>
+
+        <!-- Left/right scale labels -->
+        <text x="16" y="163" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#525C58">$0</text>
+        <text id="gaugeMaxLabel" x="244" y="163" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#525C58">$0</text>
+        <text x="130" y="163" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#525C58" opacity="0.6">50%</text>
+      </svg>
+
+      <!-- Legend -->
+      <div class="gauge-legend">
+        <div class="gauge-legend-item"><span class="gauge-dot" style="background:#27AE60"></span>Balance</div>
+        <div class="gauge-legend-item"><span class="gauge-dot" style="background:#C0392B"></span>Expenses</div>
+        <div class="gauge-legend-item" id="simLegend" style="display:none"><span class="gauge-dot" style="background:#2471A3"></span>Simulated</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Add Transaction</div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Description</label>
+        <input type="text" id="txDesc" placeholder="e.g. Salary, Groceries, Netflix">
+      </div>
+      <div class="form-row" style="margin-bottom:10px">
+        <div class="form-group">
+          <label>Amount ($)</label>
+          <input type="number" id="txAmount" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="txType">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Date</label>
+        <input type="date" id="txDate">
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="addTransaction()">Add transaction</button>
+        <button class="btn btn-ghost" onclick="startSim()">Simulate purchase</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Transactions</div>
+      <div class="tx-list" id="txList">
+        <div class="empty"><div class="empty-line"></div><div class="empty-text">No transactions yet</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="simModal" style="display:none" class="card section-gap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:0">Purchase Simulator</div>
+      <button class="btn btn-ghost" style="padding:4px 12px;font-size:11px" onclick="exitSim()">Close</button>
+    </div>
+    <div class="alert alert-info">This will not affect your real balance. Preview the impact before spending.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Item or expense</label>
+        <input type="text" id="simDesc" placeholder="e.g. New laptop, vacation...">
+      </div>
+      <div class="form-group">
+        <label>Cost ($)</label>
+        <input type="number" id="simCost" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button class="btn btn-primary" onclick="runSim()">Run simulation</button>
+        <button class="btn btn-ghost" onclick="clearSim()">Clear</button>
+      </div>
+    </div>
+    <div id="simResult" style="margin-top:16px;display:none">
+      <div class="divider"></div>
+      <div class="grid-2">
+        <div class="stat">
+          <div class="stat-label">Balance after purchase</div>
+          <div class="stat-value" id="simAfter">$0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Cost</div>
+          <div class="stat-value" id="simDiff" style="color:var(--danger)">-$0</div>
+        </div>
+      </div>
+      <div id="simAdvice" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WORKOUT -->
+<div class="tab-content" id="tab-workout">
+  <div class="page-header">
+    <div class="page-title">Workouts</div>
+    <div class="page-sub">Log exercises, track runs, and get AI recovery recommendations</div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">Today's Exercises</div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group">
+          <label>Exercise</label>
+          <input type="text" id="exName" placeholder="e.g. Push-ups">
+        </div>
+        <div class="form-group" style="max-width:90px">
+          <label>Sets</label>
+          <input type="number" id="exSets" placeholder="3" min="1">
+        </div>
+        <div class="form-group" style="max-width:90px">
+          <label>Reps</label>
+          <input type="number" id="exReps" placeholder="12" min="1">
+        </div>
+        <button class="btn btn-primary" onclick="addExercise()" style="margin-top:20px">Add</button>
+      </div>
+      <div id="exerciseList">
+        <div class="empty"><div class="empty-line"></div><div class="empty-text">No exercises logged</div></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px">
+        <div class="stat" style="flex:1;padding:12px 16px">
+          <div class="stat-label">Total reps</div>
+          <div class="stat-value" id="totalVolume" style="font-size:20px">0</div>
+        </div>
+        <div class="stat" style="flex:1;padding:12px 16px">
+          <div class="stat-label">Exercises</div>
+          <div class="stat-value" id="exerciseCount" style="font-size:20px">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Log a Run</div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Distance (km)</label>
+        <input type="number" id="runDist" placeholder="5.0" step="0.1" min="0">
+      </div>
+      <div class="form-row" style="margin-bottom:10px">
+        <div class="form-group">
+          <label>Duration (min)</label>
+          <input type="number" id="runTime" placeholder="30" min="1">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="runDate">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Notes (optional)</label>
+        <input type="text" id="runNotes" placeholder="e.g. Felt strong, morning run">
+      </div>
+      <button class="btn btn-primary" onclick="addRun()">Log run</button>
+      <div class="section-gap">
+        <div class="card-title">Recent Runs</div>
+        <div id="runList">
+          <div class="empty"><div class="empty-line"></div><div class="empty-text">No runs logged yet</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Run Performance</div>
+    <canvas id="runChart" height="110"></canvas>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div class="card-title" style="margin-bottom:4px">AI Recovery Advisor</div>
+        <span class="badge badge-ai">Vera AI</span>
+      </div>
+      <button class="btn btn-primary" onclick="getRecoveryAdvice(this)">Analyze workouts</button>
+    </div>
+    <div id="recoveryAdvice">
+      <div class="empty"><div class="empty-line"></div><div class="empty-text">Run analysis to get rest day recommendations</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCTIVITY -->
+<div class="tab-content" id="tab-productivity">
+  <div class="page-header">
+    <div class="page-title">Productivity</div>
+    <div class="page-sub">Plan your day, track completion, and receive your AI-powered score</div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">Today's Tasks</div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group">
+          <label>New task</label>
+          <input type="text" id="taskInput" placeholder="e.g. Review project proposal" onkeydown="if(event.key==='Enter')addTask()">
+        </div>
+        <button class="btn btn-primary" onclick="addTask()" style="margin-top:20px">Add</button>
+        <button class="btn btn-ghost" onclick="openRecurModal()" style="margin-top:20px" title="Add recurring task">&#8635; Recurring</button>
+      </div>
+      <div id="taskList">
+        <div class="empty"><div class="empty-line"></div><div class="empty-text">Plan your day by adding tasks</div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="grid-2">
+        <div class="stat" style="padding:12px 16px">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value" id="tasksCompleted" style="font-size:20px">0/0</div>
+        </div>
+        <div class="stat" style="padding:12px 16px">
+          <div class="stat-label">Completion rate</div>
+          <div class="stat-value" id="completionRate" style="font-size:20px">0%</div>
+        </div>
+      </div>
+
+      <!-- Recurring tasks list -->
+      <div id="recurringSection" style="margin-top:16px;display:none">
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:500">Recurring Tasks</div>
+        <div id="recurringList"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="text-align:center;margin-bottom:16px">
+        <div class="card-title">Daily Score</div>
+        <div class="score-ring">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="46" fill="none" stroke="var(--surface2)" stroke-width="8"/>
+            <circle id="scoreCircle" cx="55" cy="55" r="46" fill="none"
+              stroke="var(--accent)" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289"
+              style="transition:stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1)"/>
+          </svg>
+          <div class="score-ring-num">
+            <div class="score-big" id="scoreNum">—</div>
+            <div class="score-label">/10</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <span style="font-size:12px;color:var(--muted);font-family:var(--font-mono)">AI day debrief</span>
+        <span class="badge badge-ai">Vera AI</span>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="startDayDebrief()">Start debrief</button>
+      <div id="debriefArea" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <div class="card" id="debriefChatCard" style="display:none">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:0">Day Debrief</div>
+      <span class="badge badge-ai">Vera AI</span>
+    </div>
+    <div class="chat-wrap" style="height:320px">
+      <div class="chat-messages" id="debriefMessages"></div>
+      <div class="chat-input-row">
+        <input class="chat-input" type="text" id="debriefInput" placeholder="Reflect on your day..." onkeydown="if(event.key==='Enter')sendDebrief()">
+        <button class="btn btn-primary" onclick="sendDebrief()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GOALS -->
+<div class="tab-content" id="tab-goals">
+  <div class="page-header">
+    <div class="page-title">Goals</div>
+    <div class="page-sub">Set goals, track daily progress, and get personalized AI coaching</div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:20px">
+    <div class="card">
+      <div class="card-title">Create Goal</div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Title</label>
+        <input type="text" id="goalTitle" placeholder="e.g. Learn Spanish, Run 5km, Save $10k">
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Description</label>
+        <textarea id="goalDesc" placeholder="Why does this goal matter to you?"></textarea>
+      </div>
+      <div class="form-row" style="margin-bottom:16px">
+        <div class="form-group">
+          <label>Target date</label>
+          <input type="date" id="goalDate">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="goalCat">
+            <option>Health</option>
+            <option>Finance</option>
+            <option>Learning</option>
+            <option>Career</option>
+            <option>Personal</option>
+            <option>Fitness</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="addGoal()">Create goal</button>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0">Log Today's Progress</div>
+        <span class="badge badge-ai">Vera AI</span>
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Select goal</label>
+        <select id="progressGoal">
+          <option value="">Choose a goal</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>What did you do today toward this goal?</label>
+        <textarea id="progressNote" placeholder="e.g. Completed 30 min Duolingo session..."></textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Progress increase (%)</label>
+        <input type="number" id="progressPct" placeholder="e.g. 5" min="0" max="100">
+      </div>
+      <button class="btn btn-primary" onclick="logGoalProgress()">Log progress + get AI tip</button>
+    </div>
+  </div>
+
+  <div id="goalsList">
+    <div class="empty"><div class="empty-line"></div><div class="empty-text">No goals yet — create your first one above</div></div>
+  </div>
+
+  <div id="goalAiTip" style="display:none" class="card section-gap">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <div class="card-title" style="margin-bottom:0">AI Goal Coach</div>
+      <span class="badge badge-ai">Vera AI</span>
+    </div>
+    <div id="goalTipContent"></div>
+  </div>
+
+  <!-- Tomorrow's Goals -->
+  <div class="card section-gap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div class="card-title" style="margin-bottom:4px">Plan Tomorrow's Tasks</div>
+        <div style="font-size:12px;color:var(--muted);font-family:var(--font-mono)">These load automatically at midnight</div>
+      </div>
+    </div>
+    <div id="tomorrowTasksList" style="margin-bottom:12px"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Add task for tomorrow</label>
+        <input type="text" id="tomorrowTaskInput" placeholder="e.g. Study for 1 hour, Call the bank..." onkeydown="if(event.key==='Enter')addTomorrowTask()">
+      </div>
+      <button class="btn btn-primary" onclick="addTomorrowTask()" style="margin-top:20px">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI ASSISTANT -->
+<div class="tab-content" id="tab-ai">
+  <div class="page-header">
+    <div class="page-title">AI Assistant</div>
+    <div class="page-sub">Vera has full context of your data — ask anything about your life</div>
+  </div>
+
+  <div class="alert alert-info" style="margin-bottom:14px">
+    Vera knows your balance, workouts, task completion, and goals. Ask for insights, advice, or a full summary.
+  </div>
+
+  <div id="debugPanel" class="card" style="margin-bottom:14px;font-family:var(--font-mono);font-size:11px;display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="color:var(--accent);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;font-size:10px">Connection Diagnostics</span>
+      <span style="cursor:pointer;color:var(--muted);font-size:16px" onclick="document.getElementById('debugPanel').style.display='none'">&#215;</span>
+    </div>
+    <div id="debugLog" style="color:var(--text);line-height:2"></div>
+  </div>
+  <button class="btn btn-ghost" style="margin-bottom:14px;font-size:12px;width:100%;justify-content:center" onclick="runDiagnostic()">Run connection test</button>
+
+
+    <div class="chat-messages" id="aiMessages">
+      <div class="msg ai">
+        <div class="msg-avatar">V</div>
+        <div class="msg-bubble">Hello. I'm Vera, your personal AI assistant. I have full visibility into your financial data, workout logs, daily productivity, and goals. Ask me anything — from "How are my finances looking?" to "Should I rest today?" to "Am I on track with my goals?" I'm here to give you clear, honest answers based on your real data.</div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" type="text" id="aiInput" placeholder="Ask anything about your data..." onkeydown="if(event.key==='Enter')sendAiMessage()">
+      <button class="btn btn-primary" onclick="sendAiMessage()">Send</button>
+    </div>
+  </div>
+
+  <div class="card section-gap">
+    <div class="card-title">Quick Insights</div>
+    <div class="grid-auto">
+      <button class="btn btn-ghost" style="justify-content:center;padding:13px;font-size:12px" onclick="quickAsk('Give me a full summary of my finances — balance, income, spending patterns.')">Finance overview</button>
+      <button class="btn btn-ghost" style="justify-content:center;padding:13px;font-size:12px" onclick="quickAsk('Analyze my workout history and tell me whether I should rest or train today.')">Workout analysis</button>
+      <button class="btn btn-ghost" style="justify-content:center;padding:13px;font-size:12px" onclick="quickAsk('Assess my productivity patterns and give me specific tips to improve.')">Productivity check</button>
+      <button class="btn btn-ghost" style="justify-content:center;padding:13px;font-size:12px" onclick="quickAsk('Review all my goals, give me a progress report, and tell me what to prioritize.')">Goals review</button>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- BOTTOM NAV (mobile only) -->
+<nav class="bottom-nav" id="bottomNav">
+  <div class="bottom-nav-item active" data-tab="money" onclick="switchTab('money',this,true)">
+    <div class="bottom-nav-icon">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    </div>
+    <span class="bottom-nav-label">Money</span>
+  </div>
+  <div class="bottom-nav-item" data-tab="workout" onclick="switchTab('workout',this,true)">
+    <div class="bottom-nav-icon">
+      <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M4 12h16M2 9.5l2 2.5-2 2.5M22 9.5l-2 2.5 2 2.5"/></svg>
+    </div>
+    <span class="bottom-nav-label">Workouts</span>
+  </div>
+  <div class="bottom-nav-item" data-tab="productivity" onclick="switchTab('productivity',this,true)">
+    <div class="bottom-nav-icon">
+      <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </div>
+    <span class="bottom-nav-label">Tasks</span>
+  </div>
+  <div class="bottom-nav-item" data-tab="goals" onclick="switchTab('goals',this,true)">
+    <div class="bottom-nav-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    </div>
+    <span class="bottom-nav-label">Goals</span>
+  </div>
+  <div class="bottom-nav-item" data-tab="ai" onclick="switchTab('ai',this,true)">
+    <div class="bottom-nav-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3h-1v1a4 4 0 0 1-8 0v-1H7a3 3 0 0 1-3-3v-2a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z"/><line x1="9" y1="12" x2="9" y2="12.01"/><line x1="15" y1="12" x2="15" y2="12.01"/></svg>
+    </div>
+    <span class="bottom-nav-label">Vera AI</span>
+  </div>
+</nav>
+
+<!-- RECURRING TASK MODAL -->
+<div class="api-modal-overlay" id="recurModalOverlay" onclick="closeRecurModal(event)">
+  <div class="api-modal">
+    <div class="api-modal-handle"></div>
+    <h3>Recurring Task</h3>
+    <p>This task will automatically appear on selected days each week.</p>
+
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Task name</label>
+      <input type="text" id="recurName" placeholder="e.g. Morning run, Read 30 min..." style="font-size:16px!important">
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-family:var(--font-mono);color:var(--text);font-weight:500;letter-spacing:0.04em;display:block;margin-bottom:8px">Days of the week</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <label class="day-chip"><input type="checkbox" value="0" onchange="toggleDay(this)"><span>Sun</span></label>
+        <label class="day-chip"><input type="checkbox" value="1" onchange="toggleDay(this)"><span>Mon</span></label>
+        <label class="day-chip"><input type="checkbox" value="2" onchange="toggleDay(this)"><span>Tue</span></label>
+        <label class="day-chip"><input type="checkbox" value="3" onchange="toggleDay(this)"><span>Wed</span></label>
+        <label class="day-chip"><input type="checkbox" value="4" onchange="toggleDay(this)"><span>Thu</span></label>
+        <label class="day-chip"><input type="checkbox" value="5" onchange="toggleDay(this)"><span>Fri</span></label>
+        <label class="day-chip"><input type="checkbox" value="6" onchange="toggleDay(this)"><span>Sat</span></label>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Repeat for how many weeks? (leave blank = forever)</label>
+      <input type="number" id="recurWeeks" placeholder="e.g. 4 (or leave blank for always)" min="1" style="font-size:16px!important">
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveRecurTask()">Save recurring task</button>
+  </div>
+</div>
+
+<!-- MOBILE API KEY BUTTON -->
+<div class="bottom-nav-key" onclick="openApiModal()" title="Set API Key">
+  <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+</div>
+
+<!-- MOBILE API KEY MODAL -->
+<div class="api-modal-overlay" id="apiModalOverlay" onclick="closeApiModal(event)">
+  <div class="api-modal">
+    <div class="api-modal-handle"></div>
+    <h3>Settings</h3>
+
+    <label class="api-label" style="display:block;margin-bottom:6px">Gemini API Key</label>
+    <input class="api-key-input" type="password" id="apiKeyMobile"
+      placeholder="AIza..."
+      style="font-size:16px!important;margin-bottom:6px"
+      oninput="syncApiKey(this.value)">
+    <div class="api-modal-status" id="apiModalStatus"></div>
+
+    <label class="api-label" style="display:block;margin-top:14px;margin-bottom:6px">Cloudflare Proxy URL <span style="color:var(--danger)">*required for iPhone</span></label>
+    <input class="api-key-input" type="text" id="proxyUrlMobile"
+      placeholder="https://vera.yourname.workers.dev"
+      style="font-size:16px!important;margin-bottom:6px"
+      oninput="syncProxyUrl(this.value)">
+    <div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);margin-bottom:14px;line-height:1.6">Gemini works directly in Safari — no proxy needed. Leave blank.</div>
+
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveAndClose()">Save</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let state = {
+  transactions: [], simMode: false, simBalance: 0,
+  exercises: [], runs: [], tasks: [], goals: [], recurringTasks: [],
+  debriefHistory: [], aiHistory: [], productivityScore: null,
+};
+let runChart = null;
+
+// ── PERSISTENCE ──
+function save() { try { localStorage.setItem('vera_state', JSON.stringify(state)); } catch(e){} }
+function load() { try { const s = localStorage.getItem('vera_state'); if(s) state = {...state, ...JSON.parse(s)}; } catch(e){} }
+function saveApiKey(v) { try { localStorage.setItem('vera_api_key', v); } catch(e){} }
+function saveProxyUrl(v) { try { localStorage.setItem('vera_proxy_url', v.trim()); } catch(e){} }
+function getApiKey() {
+  return document.getElementById('apiKey').value ||
+    (typeof localStorage !== 'undefined' ? localStorage.getItem('vera_api_key') || '' : '');
+}
+
+// ── TAB SWITCHING ──
+function switchTab(tab, el, fromBottom) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+
+  const sideEl = document.querySelector(`.nav-item[data-tab="${tab}"]`);
+  const botEl  = document.querySelector(`.bottom-nav-item[data-tab="${tab}"]`);
+  if (sideEl) sideEl.classList.add('active');
+  if (botEl)  botEl.classList.add('active');
+
+  if (fromBottom) window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Re-render chart when workout tab is shown (canvas needs to be visible first)
+  if (tab === 'workout') setTimeout(renderRunChart, 50);
+}
+
+// ── GEMINI API ── (works natively in browsers + iPhone Safari PWA)
+const MODEL_FAST  = 'gemini-2.0-flash';
+const MODEL_SMART = 'gemini-2.0-flash';
+
+async function callClaude(messages, systemPrompt, model = MODEL_FAST) {
+  const key = getApiKey();
+  if (!key) return 'Please enter your Gemini API key in the sidebar to enable AI features.';
+
+  const geminiMessages = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
+  if (systemPrompt) {
+    geminiMessages.unshift(
+      { role: 'user', parts: [{ text: systemPrompt }] },
+      { role: 'model', parts: [{ text: 'Understood. I will follow these instructions.' }] }
+    );
+  }
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: geminiMessages,
+        generationConfig: { maxOutputTokens: 600, temperature: 0.7 }
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) return `Error ${res.status}: ${data?.error?.message || JSON.stringify(data)}`;
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received.';
+  } catch(e) {
+    return `Network error: ${e.message}`;
+  }
+}
+
+// ── RICH CROSS-TAB CONTEXT ──
+// Full snapshot of everything Vera knows — used by AI assistant
+function getFullContext() {
+  const balance = calcBalance(), income = calcIncome(), expense = calcExpense();
+  const topExpenses = [...state.transactions].filter(t=>t.type==='expense')
+    .sort((a,b)=>b.amount-a.amount).slice(0,3)
+    .map(t=>`${t.desc} ($${t.amount.toFixed(2)})`).join(', ');
+  const avgPace = state.runs.length
+    ? (state.runs.reduce((s,r)=>s+r.pace,0)/state.runs.length).toFixed(2) : null;
+  const bestRun = state.runs.length
+    ? [...state.runs].sort((a,b)=>b.dist-a.dist)[0] : null;
+  const doneTasks = state.tasks.filter(t=>t.done).length;
+  const pendingTasks = state.tasks.filter(t=>!t.done).map(t=>t.text).join(', ');
+  const recentGoalLogs = state.goals.flatMap(g =>
+    g.logs.slice(-2).map(l=>`${g.title}: "${l.note}" on ${l.date}`)
+  ).join(' | ');
+  const savingsRate = income > 0 ? (((income - expense) / income) * 100).toFixed(1) : null;
+
+  return `=== VERA USER DATA (full snapshot) ===
+
+MONEY:
+- Balance: $${balance.toFixed(2)} | Income: $${income.toFixed(2)} | Expenses: $${expense.toFixed(2)}
+- Savings rate: ${savingsRate ? savingsRate + '%' : 'N/A'}
+- Top expenses: ${topExpenses || 'none'}
+- All transactions (newest first): ${state.transactions.slice(0,10).map(t=>`${t.type} $${t.amount} "${t.desc}" ${t.date}`).join(' | ') || 'none'}
+
+WORKOUTS:
+- Exercises today: ${state.exercises.map(e=>`${e.name} ${e.sets}x${e.reps}${e.done?' (done)':''}`).join(', ') || 'none'}
+- Total runs logged: ${state.runs.length}
+- Average pace: ${avgPace ? avgPace + ' min/km' : 'N/A'}
+- Best run: ${bestRun ? `${bestRun.dist}km on ${bestRun.date}` : 'N/A'}
+- All runs: ${state.runs.slice(0,8).map(r=>`${r.dist}km in ${r.time}min (${r.pace}min/km) on ${r.date}${r.notes?' - '+r.notes:''}`).join(' | ') || 'none'}
+
+PRODUCTIVITY:
+- Today's tasks: ${doneTasks}/${state.tasks.length} completed
+- Pending tasks: ${pendingTasks || 'none'}
+- Completed tasks: ${state.tasks.filter(t=>t.done).map(t=>t.text).join(', ') || 'none'}
+- Last productivity score: ${state.productivityScore !== null ? state.productivityScore + '/10' : 'not yet scored'}
+
+GOALS:
+${state.goals.length ? state.goals.map(g =>
+  `- "${g.title}" [${g.cat}]: ${g.progress}% complete, ${g.streak}-day streak${g.date?' (due '+g.date+')':''}${g.desc?' — '+g.desc:''}. Recent logs: ${g.logs.slice(-2).map(l=>l.note).join('; ') || 'none'}`
+).join('\n') : '- No goals set yet'}
+
+RECENT GOAL ACTIVITY: ${recentGoalLogs || 'none'}
+=== END DATA ===`;
+}
+
+// Focused context per feature — smaller = cheaper
+function getWorkoutContext() {
+  return `Exercises today: ${state.exercises.map(e=>`${e.name} ${e.sets}x${e.reps}`).join(', ') || 'none'}
+Runs (all): ${state.runs.slice(0,8).map(r=>`${r.dist}km in ${r.time}min (${r.pace}min/km) on ${r.date}${r.notes?' ['+r.notes+']':''}`).join(' | ') || 'none'}
+Total days active: ${state.runs.length + (state.exercises.length > 0 ? 1 : 0)}
+Goals related to fitness: ${state.goals.filter(g=>g.cat==='Health'||g.cat==='Fitness').map(g=>`"${g.title}" ${g.progress}%`).join(', ') || 'none'}`;
+}
+
+function getGoalContext(goal) {
+  const balance = calcBalance();
+  const recentTasks = state.tasks.filter(t=>t.done).map(t=>t.text).slice(-5).join(', ');
+  return `Goal: "${goal.title}" [${goal.cat}]
+Description: ${goal.desc || 'none'}
+Progress: ${goal.progress}% | Streak: ${goal.streak} days${goal.date ? ' | Due: '+goal.date : ''}
+All past entries: ${goal.logs.map(l=>`"${l.note}" (+${l.pctAdd}% on ${l.date})`).join(' | ') || 'none'}
+Other active goals: ${state.goals.filter(g=>g.id!==goal.id).map(g=>`"${g.title}" ${g.progress}%`).join(', ') || 'none'}
+Financial context: balance $${balance.toFixed(2)} (relevant if goal is financial)
+Recent productive tasks completed: ${recentTasks || 'none'}`;
+}
+
+function getProductivityContext() {
+  const avgPace = state.runs.length ? (state.runs.reduce((s,r)=>s+r.pace,0)/state.runs.length).toFixed(2) : null;
+  return `Tasks today: ${state.tasks.map(t=>`[${t.done?'done':'pending'}] ${t.text}`).join(' | ') || 'none'}
+Done: ${state.tasks.filter(t=>t.done).length}/${state.tasks.length}
+Past productivity score: ${state.productivityScore !== null ? state.productivityScore+'/10' : 'N/A'}
+Workouts today: ${state.exercises.map(e=>e.name).join(', ') || 'none (exercise affects cognitive energy)'}
+Average run pace: ${avgPace ? avgPace+' min/km' : 'N/A'}
+Active goals: ${state.goals.map(g=>`"${g.title}" ${g.progress}%`).join(', ') || 'none'}`;
+}
+
+// ── MONEY ──
+function calcBalance() { return state.transactions.reduce((s,t) => t.type==='income' ? s+t.amount : s-t.amount, 0); }
+function calcIncome()  { return state.transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0); }
+function calcExpense() { return state.transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0); }
+
+function addTransaction() {
+  const desc = document.getElementById('txDesc').value.trim();
+  const amount = parseFloat(document.getElementById('txAmount').value);
+  const type = document.getElementById('txType').value;
+  const date = document.getElementById('txDate').value;
+  if (!desc || isNaN(amount) || amount <= 0) { alert('Enter a description and valid amount.'); return; }
+  state.transactions.unshift({ desc, amount, type, date: date || new Date().toISOString().split('T')[0], id: Date.now() });
+  document.getElementById('txDesc').value = '';
+  document.getElementById('txAmount').value = '';
+  save(); renderMoney();
+}
+
+function renderMoney() {
+  const balance = calcBalance(), income = calcIncome(), expense = calcExpense();
+  const display = state.simMode ? state.simBalance : balance;
+
+  // ── Stat cards ──
+  document.getElementById('balanceVal').textContent = '$' + display.toFixed(2);
+  document.getElementById('balanceVal').style.color = display < 0 ? 'var(--danger)' : 'var(--text)';
+  document.getElementById('incomeTotal').textContent = '$' + income.toFixed(2);
+  document.getElementById('expenseTotal').textContent = '$' + expense.toFixed(2);
+  document.getElementById('sim-banner').style.display = state.simMode ? 'flex' : 'none';
+
+  // ── Gauge math ──
+  // The arc total length for our semicircle (r=110, 180°): π × r ≈ 345.4
+  const ARC = 345;
+  const max = Math.max(income, 1);
+
+  // Expense arc: how far red goes (0 → full arc)
+  const expPct  = Math.min(expense / max, 1);
+  const expOffset = ARC - (ARC * expPct);
+
+  // Balance arc: green sits ON TOP of red, from 0 → balance portion
+  const balPct   = Math.max(0, Math.min(balance / max, 1));
+  const balOffset = ARC - (ARC * balPct);
+
+  // Sim arc: blue, shows simulated balance
+  const simPct    = Math.max(0, Math.min(display / max, 1));
+  const simOffset = ARC - (ARC * simPct);
+
+  // Needle angle: -90° (left/0) → +90° (right/max), 0° = center/50%
+  function pctToAngle(p) { return -90 + (p * 180); }
+
+  document.getElementById('gaugeExpense').style.strokeDashoffset = expOffset;
+  document.getElementById('gaugeBalance').style.strokeDashoffset = balOffset;
+
+  const simEl = document.getElementById('gaugeSim');
+  const simLegend = document.getElementById('simLegend');
+  if (state.simMode) {
+    simEl.style.strokeDashoffset = simOffset;
+    simEl.style.opacity = '1';
+    simLegend.style.display = 'flex';
+    // Needle points to sim balance in blue
+    document.getElementById('gaugeNeedle').querySelector('line').setAttribute('stroke', '#2980B9');
+    document.getElementById('gaugeNeedle').querySelector('circle').setAttribute('fill', '#2980B9');
+    document.getElementById('gaugeNeedle').style.transform = `rotate(${pctToAngle(simPct)}deg)`;
+    document.getElementById('gaugeMainLabel').textContent = '$' + display.toFixed(0);
+    document.getElementById('gaugeMainLabel').setAttribute('fill', '#2980B9');
+    document.getElementById('gaugeSubLabel').textContent = 'SIMULATED';
+  } else {
+    simEl.style.strokeDashoffset = ARC;
+    simEl.style.opacity = '0';
+    simLegend.style.display = 'none';
+    // Needle points to real balance in dark
+    document.getElementById('gaugeNeedle').querySelector('line').setAttribute('stroke', '#1E2422');
+    document.getElementById('gaugeNeedle').querySelector('circle').setAttribute('fill', '#1E2422');
+    document.getElementById('gaugeNeedle').style.transform = `rotate(${pctToAngle(balPct)}deg)`;
+    document.getElementById('gaugeMainLabel').textContent = '$' + balance.toFixed(0);
+    document.getElementById('gaugeMainLabel').setAttribute('fill', balance < 0 ? '#8B3E3E' : '#1E2422');
+    document.getElementById('gaugeSubLabel').textContent = 'BALANCE';
+  }
+
+  // Max label on gauge
+  document.getElementById('gaugeMaxLabel').textContent = '$' + max.toFixed(0);
+
+  // ── Transaction list ──
+  const list = document.getElementById('txList');
+  if (!state.transactions.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-text">No transactions yet</div></div>';
+    return;
+  }
+  list.innerHTML = state.transactions.map(t => `
+    <div class="tx-item" id="tx-${t.id}">
+      <div class="tx-left">
+        <div class="tx-type-pill ${t.type}">${t.type}</div>
+        <div>
+          <div class="tx-name">${t.desc}</div>
+          <div class="tx-date">${t.date}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="tx-amount ${t.type}">${t.type==='income'?'+':'-'}$${t.amount.toFixed(2)}</div>
+        <button class="tx-delete-btn" onclick="deleteTransaction(${t.id})" title="Delete transaction">&#215;</button>
+      </div>
+    </div>`).join('');
+}
+
+function startSim() {
+  document.getElementById('simModal').style.display = 'block';
+  document.getElementById('simResult').style.display = 'none';
+}
+
+function runSim() {
+  const cost = parseFloat(document.getElementById('simCost').value);
+  const desc = document.getElementById('simDesc').value.trim() || 'this purchase';
+  if (isNaN(cost) || cost <= 0) { alert('Enter a valid cost.'); return; }
+  const balance = calcBalance(), after = balance - cost;
+  state.simMode = true; state.simBalance = after;
+  document.getElementById('simResult').style.display = 'block';
+  document.getElementById('simAfter').textContent = '$' + after.toFixed(2);
+  document.getElementById('simAfter').style.color = after < 0 ? 'var(--danger)' : 'var(--positive)';
+  document.getElementById('simDiff').textContent = '-$' + cost.toFixed(2);
+  let advice = '';
+  if (after < 0) advice = `<div class="alert alert-warn">You cannot afford ${desc}. You would be $${Math.abs(after).toFixed(2)} short.</div>`;
+  else if (after < balance * 0.1) advice = `<div class="alert alert-warn">This would leave only $${after.toFixed(2)} — under 10% of your current balance. Proceed with caution.</div>`;
+  else advice = `<div class="alert alert-success">You can comfortably afford ${desc}. You would retain $${after.toFixed(2)}.</div>`;
+  document.getElementById('simAdvice').innerHTML = advice;
+  renderMoney();
+}
+
+function exitSim() {
+  state.simMode = false; state.simBalance = 0;
+  document.getElementById('simModal').style.display = 'none';
+  document.getElementById('simResult').style.display = 'none';
+  document.getElementById('simDesc').value = '';
+  document.getElementById('simCost').value = '';
+  renderMoney();
+}
+
+function clearSim() {
+  state.simMode = false; state.simBalance = 0;
+  document.getElementById('simResult').style.display = 'none';
+  document.getElementById('simDesc').value = '';
+  document.getElementById('simCost').value = '';
+  renderMoney();
+}
+
+function deleteTransaction(id) {
+  state.transactions = state.transactions.filter(t => t.id !== id);
+  save(); renderMoney();
+}
+
+// ── WORKOUT ──
+function addExercise() {
+  const name = document.getElementById('exName').value.trim();
+  const sets = parseInt(document.getElementById('exSets').value);
+  const reps = parseInt(document.getElementById('exReps').value);
+  if (!name || isNaN(sets) || isNaN(reps)) { alert('Fill in exercise name, sets, and reps.'); return; }
+  state.exercises.push({ name, sets, reps, done: false, id: Date.now() });
+  document.getElementById('exName').value = '';
+  document.getElementById('exSets').value = '';
+  document.getElementById('exReps').value = '';
+  save(); renderExercises();
+}
+
+function toggleExercise(id) {
+  const ex = state.exercises.find(e => e.id === id);
+  if (ex) ex.done = !ex.done;
+  save(); renderExercises();
+}
+
+function deleteExercise(id) {
+  state.exercises = state.exercises.filter(e => e.id !== id);
+  save(); renderExercises();
+}
+
+function renderExercises() {
+  const totalReps = state.exercises.reduce((s,e) => s + (e.sets * e.reps), 0);
+  document.getElementById('totalVolume').textContent = totalReps;
+  document.getElementById('exerciseCount').textContent = state.exercises.length;
+  const list = document.getElementById('exerciseList');
+  if (!state.exercises.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-text">No exercises logged</div></div>';
+    return;
+  }
+  list.innerHTML = state.exercises.map(e => `
+    <div class="exercise-item">
+      <div class="exercise-check ${e.done?'done':''}" onclick="toggleExercise(${e.id})">${e.done?'&#10003;':''}</div>
+      <div class="exercise-name" style="${e.done?'text-decoration:line-through;color:var(--muted)':''}">${e.name}</div>
+      <div class="exercise-reps">${e.sets}&times;${e.reps}</div>
+      <div class="exercise-delete" onclick="deleteExercise(${e.id})">&#215;</div>
+    </div>`).join('');
+}
+
+function addRun() {
+  const dist = parseFloat(document.getElementById('runDist').value);
+  const time = parseInt(document.getElementById('runTime').value);
+  const date = document.getElementById('runDate').value;
+  const notes = document.getElementById('runNotes').value.trim();
+  if (isNaN(dist) || isNaN(time) || !date) { alert('Enter distance, time, and date.'); return; }
+  state.runs.unshift({ dist, time, date, notes, pace: parseFloat((time / dist).toFixed(2)), id: Date.now() });
+  document.getElementById('runDist').value = '';
+  document.getElementById('runTime').value = '';
+  document.getElementById('runNotes').value = '';
+  save(); renderRuns();
+}
+
+function renderRuns() {
+  const list = document.getElementById('runList');
+  if (!state.runs.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-text">No runs logged yet</div></div>';
+  } else {
+    list.innerHTML = state.runs.map(r => `
+      <div class="tx-item">
+        <div class="tx-left">
+          <div class="tx-type-pill income">run</div>
+          <div>
+            <div class="tx-name">${r.dist} km &mdash; ${r.time} min</div>
+            <div class="tx-date">${r.date}${r.notes ? ' &middot; ' + r.notes : ''}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">${r.pace} min/km</div>
+          <button class="tx-delete-btn" style="opacity:1" onclick="deleteRun(${r.id})" title="Delete run">&#215;</button>
+        </div>
+      </div>`).join('');
+  }
+  renderRunChart();
+}
+
+function deleteRun(id) {
+  state.runs = state.runs.filter(r => r.id !== id);
+  save(); renderRuns();
+}
+
+function renderRunChart() {
+  try {
+    const canvas = document.getElementById('runChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const sorted = [...state.runs].sort((a,b) => a.date.localeCompare(b.date)).slice(-12);
+    if (runChart) { runChart.destroy(); runChart = null; }
+    if (!sorted.length) return;
+    runChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: sorted.map(r => r.date),
+        datasets: [
+          {
+            label: 'Distance (km)',
+            data: sorted.map(r => r.dist),
+            borderColor: '#5A6A63',
+            backgroundColor: 'rgba(90,106,99,0.08)',
+            tension: 0.4,
+            fill: true,
+            yAxisID: 'y',
+            pointBackgroundColor: '#5A6A63',
+            pointRadius: 4
+          },
+          {
+            label: 'Pace (min/km)',
+            data: sorted.map(r => r.pace),
+            borderColor: '#8A9490',
+            backgroundColor: 'transparent',
+            tension: 0.4,
+            fill: false,
+            yAxisID: 'y1',
+            pointBackgroundColor: '#8A9490',
+            pointRadius: 3,
+            borderDash: [4, 3]
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            labels: { color: '#525C58', font: { family: 'DM Mono', size: 11 }, boxWidth: 20 }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#525C58', font: { family: 'DM Mono', size: 10 } },
+            grid: { color: 'rgba(42,47,45,0.06)' }
+          },
+          y: {
+            ticks: { color: '#525C58', font: { family: 'DM Mono', size: 10 } },
+            grid: { color: 'rgba(42,47,45,0.06)' },
+            title: { display: true, text: 'km', color: '#525C58', font: { size: 10 } }
+          },
+          y1: {
+            position: 'right',
+            ticks: { color: '#525C58', font: { family: 'DM Mono', size: 10 } },
+            grid: { display: false },
+            title: { display: true, text: 'min/km', color: '#525C58', font: { size: 10 } }
+          }
+        }
+      }
+    });
+  } catch(e) {
+    console.warn('Chart render error:', e.message);
+  }
+}
+
+async function getRecoveryAdvice(btn) {
+  btn.disabled = true; btn.textContent = 'Analyzing...';
+  const box = document.getElementById('recoveryAdvice');
+  box.innerHTML = '<div class="ai-thinking"><div class="ai-dot"></div> Analyzing your workout history...</div>';
+  const sys = `You are a professional fitness coach. Analyze the workout data and give a structured recovery recommendation in under 160 words. Format: 1) Rest or train recommendation, 2) Why (based on actual numbers), 3) Specific plan for tomorrow. Reference the user's actual runs and exercises. No emoji.`;
+  const reply = await callClaude([{ role: 'user', content: getWorkoutContext() }], sys, MODEL_HAIKU);
+  box.innerHTML = `<div style="font-size:13px;line-height:1.75;color:var(--text);white-space:pre-wrap">${reply}</div>`;
+  btn.disabled = false; btn.textContent = 'Analyze workouts';
+}
+
+// ── PRODUCTIVITY ──
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function addTask() {
+  const text = document.getElementById('taskInput').value.trim();
+  if (!text) return;
+  state.tasks.push({ text, done: false, id: Date.now(), recurring: false });
+  document.getElementById('taskInput').value = '';
+  save(); renderTasks();
+}
+
+function toggleTask(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (t) t.done = !t.done;
+  save(); renderTasks();
+}
+
+function deleteTask(id) {
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  save(); renderTasks();
+}
+
+function renderTasks() {
+  const allTasks = getTodaysTasks();
+  const done = allTasks.filter(t=>t.done).length;
+  const total = allTasks.length;
+  document.getElementById('tasksCompleted').textContent = done + '/' + total;
+  document.getElementById('completionRate').textContent = total ? Math.round((done/total)*100) + '%' : '0%';
+  const list = document.getElementById('taskList');
+  if (!allTasks.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-text">Plan your day by adding tasks</div></div>';
+  } else {
+    list.innerHTML = allTasks.map(t => `
+      <div class="task-item ${t.done?'done-item':''}">
+        <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})">${t.done?'&#10003;':''}</div>
+        <div style="flex:1;display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+          <span class="task-text" style="margin:0">${t.text}</span>
+          ${t.recurring ? `<span class="task-recur-badge">&#8635; recurring</span>` : ''}
+        </div>
+        <div class="task-del" onclick="deleteTask(${t.id})">&#215;</div>
+      </div>`).join('');
+  }
+  renderRecurringList();
+}
+
+// Returns today's one-off tasks + today's recurring tasks injected
+function getTodaysTasks() {
+  const todayDow = new Date().getDay(); // 0=Sun … 6=Sat
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // Ensure recurring tasks for today exist in state.tasks
+  (state.recurringTasks || []).forEach(rt => {
+    if (!rt.days.includes(todayDow)) return;
+    // Check weeks limit
+    if (rt.weeksLeft !== null) {
+      const created = new Date(rt.createdAt);
+      const now = new Date();
+      const weeksPassed = Math.floor((now - created) / (7 * 24 * 3600 * 1000));
+      if (weeksPassed >= rt.weeksLeft) return;
+    }
+    // Check if already injected today
+    const exists = state.tasks.find(t => t.recurId === rt.id && t.date === todayStr);
+    if (!exists) {
+      state.tasks.push({ text: rt.text, done: false, id: Date.now() + Math.random(), recurring: true, recurId: rt.id, date: todayStr });
+      save();
+    }
+  });
+  return state.tasks;
+}
+
+// ── RECURRING TASK MODAL ──
+let selectedDays = new Set();
+
+function openRecurModal() {
+  selectedDays = new Set();
+  document.getElementById('recurName').value = '';
+  document.getElementById('recurWeeks').value = '';
+  document.querySelectorAll('.day-chip input').forEach(cb => cb.checked = false);
+  document.getElementById('recurModalOverlay').classList.add('open');
+}
+
+function closeRecurModal(e) {
+  if (e.target === document.getElementById('recurModalOverlay')) {
+    document.getElementById('recurModalOverlay').classList.remove('open');
+  }
+}
+
+function toggleDay(cb) {
+  const v = parseInt(cb.value);
+  if (cb.checked) selectedDays.add(v); else selectedDays.delete(v);
+}
+
+function saveRecurTask() {
+  const text = document.getElementById('recurName').value.trim();
+  const weeks = parseInt(document.getElementById('recurWeeks').value) || null;
+  if (!text) { alert('Enter a task name.'); return; }
+  if (selectedDays.size === 0) { alert('Select at least one day.'); return; }
+  if (!state.recurringTasks) state.recurringTasks = [];
+  state.recurringTasks.push({
+    id: Date.now(),
+    text,
+    days: [...selectedDays].sort(),
+    weeksLeft: weeks,
+    createdAt: Date.now()
+  });
+  save();
+  document.getElementById('recurModalOverlay').classList.remove('open');
+  renderTasks();
+}
+
+function deleteRecurTask(id) {
+  state.recurringTasks = (state.recurringTasks || []).filter(r => r.id !== id);
+  // Remove any injected instances of this recurring task that aren't done
+  state.tasks = state.tasks.filter(t => !(t.recurId === id && !t.done));
+  save(); renderTasks();
+}
+
+function renderRecurringList() {
+  const rts = state.recurringTasks || [];
+  const section = document.getElementById('recurringSection');
+  const list = document.getElementById('recurringList');
+  if (!rts.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = rts.map(rt => `
+    <div class="recur-item">
+      <div>
+        <div class="recur-name">${rt.text}</div>
+        <div class="recur-days">${rt.days.map(d=>DAY_NAMES[d]).join(' &middot; ')}${rt.weeksLeft ? ' &middot; ' + rt.weeksLeft + ' wks' : ' &middot; always'}</div>
+      </div>
+      <div class="recur-del" onclick="deleteRecurTask(${rt.id})">&#215;</div>
+    </div>`).join('');
+}
+
+let debriefStep = 0;
+const debriefQuestions = [
+  "Let's review your day. Which tasks did you complete, and which did you not get to?",
+  "What was the biggest obstacle or distraction you faced today?",
+  "On a scale of 1 to 10, how focused and energized did you feel throughout the day?",
+  "What is one thing you are genuinely proud of from today, however small?"
+];
+
+async function startDayDebrief() {
+  document.getElementById('debriefChatCard').style.display = 'block';
+  document.getElementById('debriefChatCard').scrollIntoView({ behavior: 'smooth' });
+  debriefStep = 0; state.debriefHistory = [];
+  document.getElementById('debriefMessages').innerHTML = '';
+  const done = state.tasks.filter(t=>t.done).length, total = state.tasks.length;
+  addDebriefMsg('ai', `Good. Let's debrief your day. You completed ${done} of ${total} task${total !== 1 ? 's' : ''}. ${debriefQuestions[0]}`);
+  state.debriefHistory.push({ role: 'assistant', content: debriefQuestions[0] });
+  debriefStep = 1;
+}
+
+function addDebriefMsg(role, text) {
+  const box = document.getElementById('debriefMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+  div.innerHTML = `<div class="msg-avatar">${role==='user'?'Y':'V'}</div><div class="msg-bubble">${text}</div>`;
+  box.appendChild(div); box.scrollTop = box.scrollHeight;
+}
+
+async function sendDebrief() {
+  const input = document.getElementById('debriefInput');
+  const text = input.value.trim(); if (!text) return;
+  input.value = ''; addDebriefMsg('user', text);
+  state.debriefHistory.push({ role: 'user', content: text });
+  const typing = document.createElement('div');
+  typing.className = 'msg ai';
+  typing.innerHTML = '<div class="msg-avatar">V</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+  document.getElementById('debriefMessages').appendChild(typing);
+  document.getElementById('debriefMessages').scrollTop = 9999;
+  const sys = `You are Vera, a calm productivity coach doing a daily debrief. Ask one question at a time. After 4+ exchanges, give a final score as SCORE: X/10 and 2 specific improvements for tomorrow. Reference actual task and goal data. Under 120 words per reply. No emoji.
+
+${getProductivityContext()}`;
+  const nextQ = debriefStep < debriefQuestions.length
+    ? `\n\nNext ask: "${debriefQuestions[debriefStep]}"`
+    : '\n\nGive final assessment: SCORE: X/10 and 2 concrete tips for tomorrow based on everything shared.';
+  const msgs = [...state.debriefHistory];
+  msgs[msgs.length-1] = { role:'user', content: text + nextQ };
+  const reply = await callClaude(msgs, sys, MODEL_HAIKU);
+  typing.remove(); addDebriefMsg('ai', reply);
+  state.debriefHistory.push({ role: 'assistant', content: reply });
+  debriefStep++;
+  const scoreMatch = reply.match(/SCORE:\s*(\d+)/i);
+  if (scoreMatch) {
+    const sc = parseInt(scoreMatch[1]);
+    state.productivityScore = sc; save(); updateScoreRing(sc);
+  }
+}
+
+function updateScoreRing(score) {
+  const pct = score / 10;
+  document.getElementById('scoreCircle').style.strokeDashoffset = 289 - (289 * pct);
+  document.getElementById('scoreNum').textContent = score;
+}
+
+// ── GOALS ──
+function addGoal() {
+  const title = document.getElementById('goalTitle').value.trim();
+  const desc = document.getElementById('goalDesc').value.trim();
+  const date = document.getElementById('goalDate').value;
+  const cat = document.getElementById('goalCat').value;
+  if (!title) { alert('Enter a goal title.'); return; }
+  state.goals.push({ title, desc, date, cat, progress: 0, streak: 0, logs: [], id: Date.now() });
+  document.getElementById('goalTitle').value = '';
+  document.getElementById('goalDesc').value = '';
+  document.getElementById('goalDate').value = '';
+  save(); renderGoals(); updateGoalSelect();
+}
+
+function renderGoals() {
+  const list = document.getElementById('goalsList');
+  if (!state.goals.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-text">No goals yet — create your first one above</div></div>';
+    return;
+  }
+  list.innerHTML = state.goals.map(g => `
+    <div class="goal-card">
+      <div class="goal-header">
+        <div>
+          <div class="goal-title">${g.title}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--font-mono)">${g.cat}${g.date ? ' &middot; Due ' + g.date : ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="goal-streak">${g.streak}d streak</div>
+          <div style="cursor:pointer;color:var(--muted);font-size:14px" onclick="deleteGoal(${g.id})">&#215;</div>
+        </div>
+      </div>
+      ${g.desc ? `<div style="font-size:12px;color:var(--muted);margin-bottom:12px;font-family:var(--font-mono)">${g.desc}</div>` : ''}
+      <div class="goal-progress-bar"><div class="goal-progress-fill" style="width:${g.progress}%"></div></div>
+      <div class="goal-pct">${g.progress}% complete</div>
+      ${g.logs.length ? `<div style="margin-top:8px;font-size:11px;color:var(--muted);font-family:var(--font-mono)">Last entry: ${g.logs[g.logs.length-1]?.date} &mdash; ${g.logs[g.logs.length-1]?.note}</div>` : ''}
+    </div>`).join('');
+}
+
+function deleteGoal(id) {
+  state.goals = state.goals.filter(g => g.id !== id);
+  save(); renderGoals(); updateGoalSelect();
+}
+
+function updateGoalSelect() {
+  const sel = document.getElementById('progressGoal');
+  sel.innerHTML = '<option value="">Choose a goal</option>' +
+    state.goals.map(g => `<option value="${g.id}">${g.title}</option>`).join('');
+}
+
+async function logGoalProgress() {
+  const id = parseInt(document.getElementById('progressGoal').value);
+  const note = document.getElementById('progressNote').value.trim();
+  const pctAdd = parseFloat(document.getElementById('progressPct').value) || 0;
+  if (!id) { alert('Select a goal.'); return; }
+  if (!note) { alert('Describe what you did today.'); return; }
+  const goal = state.goals.find(g => g.id === id); if (!goal) return;
+  goal.progress = Math.min(100, goal.progress + pctAdd);
+  goal.streak += 1;
+  goal.logs.push({ date: new Date().toISOString().split('T')[0], note, pctAdd });
+  document.getElementById('progressNote').value = '';
+  document.getElementById('progressPct').value = '';
+  save(); renderGoals();
+  const tipBox = document.getElementById('goalAiTip');
+  const tipContent = document.getElementById('goalTipContent');
+  tipBox.style.display = 'block';
+  tipContent.innerHTML = '<div class="ai-thinking"><div class="ai-dot"></div> Generating your personalized coaching tip...</div>';
+  tipBox.scrollIntoView({ behavior: 'smooth' });
+  const sys = `You are Vera, a personal success coach with full context of this user's life. Give a specific, encouraging coaching tip in under 130 words. Include: 1) Acknowledge what they did specifically, 2) One concrete action for tomorrow that connects to their other data (finances, workouts, tasks). Reference real numbers. No emoji.`;
+  const prompt = `Today's entry: "${note}" (+${pctAdd}%)
+${getGoalContext(goal)}`;
+  const reply = await callClaude([{ role: 'user', content: prompt }], sys, MODEL_HAIKU);
+  tipContent.innerHTML = `<div style="font-size:13px;line-height:1.75;color:var(--text)">${reply}</div>`;
+}
+
+// ── AI ASSISTANT ──
+async function sendAiMessage() {
+  const input = document.getElementById('aiInput');
+  const text = input.value.trim(); if (!text) return;
+  if (!getApiKey()) { addAiMsg('ai', 'Please enter your Gemini API key in the sidebar.'); return; }
+  input.value = ''; addAiMsg('user', text);
+  state.aiHistory.push({ role: 'user', content: text });
+  const typing = document.createElement('div');
+  typing.className = 'msg ai';
+  typing.innerHTML = '<div class="msg-avatar">V</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+  document.getElementById('aiMessages').appendChild(typing);
+  document.getElementById('aiMessages').scrollTop = 9999;
+  const sys = `You are Vera, a sharp personal AI assistant with complete visibility into this user's life. Be direct, specific, always reference actual numbers. No emoji. Under 200 words unless asked.\n\n${getFullContext()}`;
+  const reply = await callClaude(state.aiHistory, sys, MODEL_SMART);
+  typing.remove(); addAiMsg('ai', reply);
+  state.aiHistory.push({ role: 'assistant', content: reply });
+  if (state.aiHistory.length > 16) state.aiHistory = state.aiHistory.slice(-16);
+}
+
+function addAiMsg(role, text) {
+  const box = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+  div.innerHTML = `<div class="msg-avatar">${role==='user'?'Y':'V'}</div><div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  box.appendChild(div); box.scrollTop = box.scrollHeight;
+}
+
+async function quickAsk(q) {
+  switchTab('ai', null, false);
+  setTimeout(() => { document.getElementById('aiInput').value = q; sendAiMessage(); }, 120);
+}
+
+
+// ── TOMORROW'S TASKS ──
+function addTomorrowTask() {
+  const text = document.getElementById('tomorrowTaskInput').value.trim();
+  if (!text) return;
+  if (!state.tomorrowTasks) state.tomorrowTasks = [];
+  state.tomorrowTasks.push({ text, id: Date.now() });
+  document.getElementById('tomorrowTaskInput').value = '';
+  save(); renderTomorrowTasks();
+}
+function deleteTomorrowTask(id) {
+  state.tomorrowTasks = (state.tomorrowTasks || []).filter(t => t.id !== id);
+  save(); renderTomorrowTasks();
+}
+function renderTomorrowTasks() {
+  const list = document.getElementById('tomorrowTasksList');
+  const tasks = state.tomorrowTasks || [];
+  if (!tasks.length) {
+    list.innerHTML = '<div class="empty" style="padding:16px 0"><div class="empty-line"></div><div class="empty-text">No tasks planned yet</div></div>';
+    return;
+  }
+  list.innerHTML = tasks.map(t => `
+    <div class="task-item" style="background:var(--bg)">
+      <div style="width:18px;height:18px;border:1.5px solid var(--border2);border-radius:4px;flex-shrink:0"></div>
+      <div class="task-text">${t.text}</div>
+      <div class="task-del" onclick="deleteTomorrowTask(${t.id})">&#215;</div>
+    </div>`).join('');
+}
+
+// ── DAILY RESET ──
+function checkDailyReset() {
+  const today = new Date().toISOString().split('T')[0];
+  const lastDate = state.lastActiveDate;
+  if (lastDate && lastDate !== today) {
+    if (!state.taskHistory) state.taskHistory = [];
+    state.taskHistory.push({
+      date: lastDate,
+      tasks: state.tasks.map(t => ({ text: t.text, done: t.done })),
+      score: state.productivityScore
+    });
+    if (state.taskHistory.length > 60) state.taskHistory = state.taskHistory.slice(-60);
+    const recurInstances = state.tasks.filter(t => t.recurring);
+    const nextTasks = (state.tomorrowTasks || []).map(t => ({
+      text: t.text, done: false, id: Date.now() + Math.random(), recurring: false
+    }));
+    state.tasks = [...recurInstances, ...nextTasks];
+    state.tomorrowTasks = [];
+    state.productivityScore = null;
+  }
+  state.lastActiveDate = today;
+  save();
+}
+
+// ── MOBILE API KEY MODAL ──
+function openApiModal() {
+  const saved = localStorage.getItem('vera_api_key') || '';
+  const savedProxy = localStorage.getItem('vera_proxy_url') || '';
+  document.getElementById('apiKeyMobile').value = saved;
+  document.getElementById('proxyUrlMobile').value = savedProxy;
+  updateApiModalStatus(saved);
+  document.getElementById('apiModalOverlay').classList.add('open');
+}
+function closeApiModal(e) { if (e.target === document.getElementById('apiModalOverlay')) document.getElementById('apiModalOverlay').classList.remove('open'); }
+function syncApiKey(val) { document.getElementById('apiKey').value = val; updateApiModalStatus(val); }
+function syncProxyUrl(val) {
+  const el = document.getElementById('proxyUrl');
+  if (el) el.value = val;
+  saveProxyUrl(val);
+}
+function updateApiModalStatus(val) {
+  const el = document.getElementById('apiModalStatus'); if (!el) return;
+  if (val && val.startsWith('AIza')) { el.className='api-modal-status ok'; el.textContent='Key format looks correct'; }
+  else if (val && val.length > 10) { el.className='api-modal-status empty'; el.textContent='Key should start with AIza'; }
+  else { el.className='api-modal-status'; }
+}
+function saveAndClose() {
+  const val = document.getElementById('apiKeyMobile').value.trim();
+  const proxy = document.getElementById('proxyUrlMobile').value.trim();
+  document.getElementById('apiKey').value = val;
+  const proxyEl = document.getElementById('proxyUrl');
+  if (proxyEl) proxyEl.value = proxy;
+  saveApiKey(val);
+  saveProxyUrl(proxy);
+  document.getElementById('apiModalOverlay').classList.remove('open');
+}
+
+// ── DIAGNOSTIC ──
+async function runDiagnostic() {
+  const panel = document.getElementById('debugPanel');
+  const log   = document.getElementById('debugLog');
+  panel.style.display = 'block';
+  log.innerHTML = '';
+
+  function line(msg, ok) {
+    const color = ok === true ? 'var(--positive)' : ok === false ? 'var(--danger)' : 'var(--muted)';
+    log.innerHTML += `<div style="color:${color}">${msg}</div>`;
+  }
+
+  // 1. API key
+  const key = getApiKey();
+  if (!key) { line('✗ No API key entered', false); return; }
+  line(`✓ API key found: ${key.slice(0,20)}...`, true);
+
+  // 2. Proxy URL
+  const proxy = getProxyUrl();
+  line(`→ Endpoint: ${proxy}`, null);
+
+  // 3. Test the proxy with a GET request
+  line('Testing proxy connection...', null);
+  try {
+    const pingUrl = proxy.includes('/.netlify/functions/') ? proxy : proxy.replace('/api/claude','/.netlify/functions/claude');
+    const ping = await fetch(pingUrl, { method: 'GET' });
+    const pingText = await ping.text();
+    line(`→ Proxy GET status: ${ping.status} — ${pingText.slice(0,80)}`, ping.ok);
+  } catch(e) {
+    line(`✗ Proxy unreachable: ${e.message}`, false);
+  }
+
+  // 4. Try a minimal real API call
+  line('Testing Claude API call...', null);
+  try {
+    const headers = { 'Content-Type': 'application/json', 'x-vera-key': key };
+    const body = JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 20,
+      messages: [{ role: 'user', content: 'Reply with just: OK' }]
+    });
+    const res = await fetch(proxy, { method: 'POST', headers, body });
+    const text = await res.text();
+    line(`→ API status: ${res.status}`, res.ok);
+    line(`→ Response: ${text.slice(0, 120)}`, res.ok);
+    if (res.ok) {
+      try {
+        const json = JSON.parse(text);
+        const reply = json.content?.[0]?.text;
+        line(`✓ Claude replied: "${reply}"`, true);
+        line('✓ Everything is working!', true);
+      } catch(e) {
+        line(`✗ Could not parse JSON: ${e.message}`, false);
+      }
+    } else {
+      line(`✗ API rejected the call — check your key and billing`, false);
+    }
+  } catch(e) {
+    line(`✗ Call failed: ${e.message}`, false);
+  }
+}
+
+// ── INIT ──
+function init() {
+  load();
+  checkDailyReset();
+  const savedKey = localStorage.getItem('vera_api_key') || '';
+  const savedProxy = localStorage.getItem('vera_proxy_url') || '';
+  document.getElementById('apiKey').value = savedKey;
+  const proxyEl = document.getElementById('proxyUrl');
+  if (proxyEl) proxyEl.value = savedProxy;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('txDate').value = today;
+  document.getElementById('runDate').value = today;
+  renderMoney(); renderExercises(); renderRuns(); renderTasks(); renderGoals(); updateGoalSelect(); renderTomorrowTasks();
+  if (state.productivityScore !== null) updateScoreRing(state.productivityScore);
+  setInterval(() => {
+    const t = new Date();
+    if (t.getHours() === 0 && t.getMinutes() === 0) { checkDailyReset(); renderTasks(); renderTomorrowTasks(); }
+  }, 60 * 1000);
+}
+init();
+</script>
+</body>
+</html>
