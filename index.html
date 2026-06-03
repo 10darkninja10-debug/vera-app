@@ -915,8 +915,8 @@ textarea { resize:vertical; min-height:72px; }
     </div>
   </nav>
   <div class="sidebar-footer">
-    <label class="api-label">Gemini API Key</label>
-    <input class="api-key-input" type="password" id="apiKey" placeholder="AIza..." oninput="saveApiKey(this.value)">
+    <label class="api-label">Anthropic API Key</label>
+    <input class="api-key-input" type="password" id="apiKey" placeholder="sk-ant-api03-..." oninput="saveApiKey(this.value)">
     <label class="api-label" style="margin-top:10px">Proxy URL (leave blank)</label>
     <input class="api-key-input" type="text" id="proxyUrl" placeholder="https://vera.you.workers.dev" oninput="saveProxyUrl(this.value)">
   </div>
@@ -1477,9 +1477,9 @@ textarea { resize:vertical; min-height:72px; }
     <div class="api-modal-handle"></div>
     <h3>Settings</h3>
 
-    <label class="api-label" style="display:block;margin-bottom:6px">Gemini API Key</label>
+    <label class="api-label" style="display:block;margin-bottom:6px">Anthropic API Key</label>
     <input class="api-key-input" type="password" id="apiKeyMobile"
-      placeholder="AIza..."
+      placeholder="sk-ant-api03-..."
       style="font-size:16px!important;margin-bottom:6px"
       oninput="syncApiKey(this.value)">
     <div class="api-modal-status" id="apiModalStatus"></div>
@@ -1489,7 +1489,7 @@ textarea { resize:vertical; min-height:72px; }
       placeholder="https://vera.yourname.workers.dev"
       style="font-size:16px!important;margin-bottom:6px"
       oninput="syncProxyUrl(this.value)">
-    <div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);margin-bottom:14px;line-height:1.6">Gemini works directly in Safari — no proxy needed. Leave blank.</div>
+    <div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);margin-bottom:14px;line-height:1.6">Leave blank — the Netlify function handles everything.</div>
 
     <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveAndClose()">Save</button>
   </div>
@@ -1532,39 +1532,26 @@ function switchTab(tab, el, fromBottom) {
   if (tab === 'workout') setTimeout(renderRunChart, 50);
 }
 
-// ── GEMINI API ── (works natively in browsers + iPhone Safari PWA)
-const MODEL_FAST  = 'gemini-2.0-flash';
-const MODEL_SMART = 'gemini-2.0-flash';
+// ── ANTHROPIC API (via Netlify function — works on iPhone Safari PWA) ──
+const MODEL_FAST  = 'claude-haiku-4-5-20251001';
+const MODEL_SMART = 'claude-sonnet-4-20250514';
 
 async function callClaude(messages, systemPrompt, model = MODEL_FAST) {
   const key = getApiKey();
-  if (!key) return 'Please enter your Gemini API key in the sidebar to enable AI features.';
+  if (!key) return 'Please enter your Anthropic API key in the sidebar to enable AI features.';
 
-  const geminiMessages = messages.map(m => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: m.content }]
-  }));
-
-  if (systemPrompt) {
-    geminiMessages.unshift(
-      { role: 'user', parts: [{ text: systemPrompt }] },
-      { role: 'model', parts: [{ text: 'Understood. I will follow these instructions.' }] }
-    );
-  }
-
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
   try {
-    const res = await fetch(endpoint, {
+    const res = await fetch('/.netlify/functions/claude', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: geminiMessages,
-        generationConfig: { maxOutputTokens: 600, temperature: 0.7 }
-      })
+      headers: {
+        'Content-Type': 'application/json',
+        'x-vera-key': key
+      },
+      body: JSON.stringify({ model, max_tokens: 600, system: systemPrompt, messages })
     });
     const data = await res.json();
     if (!res.ok || data.error) return `Error ${res.status}: ${data?.error?.message || JSON.stringify(data)}`;
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received.';
+    return data.content?.[0]?.text || 'No response received.';
   } catch(e) {
     return `Network error: ${e.message}`;
   }
@@ -2233,7 +2220,7 @@ ${getGoalContext(goal)}`;
 async function sendAiMessage() {
   const input = document.getElementById('aiInput');
   const text = input.value.trim(); if (!text) return;
-  if (!getApiKey()) { addAiMsg('ai', 'Please enter your Gemini API key in the sidebar.'); return; }
+  if (!getApiKey()) { addAiMsg('ai', 'Please enter your Anthropic API key in the sidebar.'); return; }
   input.value = ''; addAiMsg('user', text);
   state.aiHistory.push({ role: 'user', content: text });
   const typing = document.createElement('div');
